@@ -1,0 +1,3 @@
+file_name,file_type,volume,descr,file_path,file_image_path
+dummy_v1.safetensors,checkpoint,7442450944,dummy data,/files/models/dummy_v1.safetensor,/files/images/dummy_v1.png
+dummy_v2.safetensors,checkpoint,6442450944,dummy data,/files/models/dummy_v2.safetensor,/files/images/dummy_v2.png
