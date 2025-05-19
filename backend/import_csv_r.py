@@ -1,6 +1,8 @@
 import csv
+import pickle
 from db import get_db, close_db
 from app import app  # Flask app 객체
+from import_func import set_app_root_path as rp
 
 def import_csv_to_db_R(csv_file_path):
     db = get_db()
@@ -59,7 +61,17 @@ def import_csv_to_db_R(csv_file_path):
     close_db()
     print("CSV import complete.")
 
+def load_config_from_file():
+    with open(rp('database/db_config.json'), 'rb') as f:
+        return pickle.load(f)
+
 # Flask 앱 컨텍스트 내에서 실행
 if __name__ == '__main__':
+    loaded_config = load_config_from_file()
+
+    # set_config 적용
+    from db import set_config
+    set_config(**loaded_config)
+
     with app.app_context():
-        import_csv_to_db_R('../database/data.csv')
+        import_csv_to_db_R(rp('database/data.csv'))
