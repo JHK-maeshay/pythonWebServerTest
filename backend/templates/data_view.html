@@ -6,33 +6,152 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='layout.css') }}">
 </head>
 <body>
-  <h1>Checkpoint 카드 목록</h1>
-  <div class="container" id="card-container"></div>
+  <h1>테스트</h1>
+
+  <div class="tabs" id="tabs">
+    <div class="tab active" data-tab="tab1">탭1</div>
+    <div class="tab" data-tab="tab2">탭2</div>
+    <div class="tab" data-tab="tab3">탭3</div>
+  </div>
+
+  <div id="tab1" class="tab-content active">
+    <div class="container" id="card-container"></div>
+  </div>
+
+  <div id="tab2" class="tab-content">
+    <p>탭2 - 개발중</p>
+  </div>
+
+  <div id="tab3" class="tab-content">
+    <h3>PNG 이미지 업로드</h3>
+    <input type="file" id="imageInput" accept="image/png">
+    <div id="preview"></div>
+
+    <div style="margin-top: 1em;">
+      <label for="safetensorId">Safetensors ID 입력:</label>
+      <input type="text" id="safetensorId" placeholder="예: 123">
+      <button id="uploadButton">서버에 업로드</button>
+    </div>
+
+    <p id="uploadStatus"></p>
+  </div>
 
   <script>
+  let selectedImage = null;
+  let selectedFileName = null;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOMContentLoaded 실행됨'); //디버그용코드
+
+    // 탭 전환 처리
+    const tabs = document.querySelectorAll('.tab');
+    const contents = document.querySelectorAll('.tab-content');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const targetId = tab.getAttribute('data-tab');
+
+        tabs.forEach(t => t.classList.remove('active'));
+        contents.forEach(c => c.classList.remove('active'));
+
+        tab.classList.add('active');
+        document.getElementById(targetId).classList.add('active');
+      });
+    });
+
+    // 탭1
     fetch('/data_get')
       .then(response => response.json())
       .then(data => {
         const container = document.getElementById('card-container');
         data.forEach(item => {
+          const imageBaseName = item.file_name.replace(/\.safetensors$/, '');//file_name의 확장자 제거
+          const imagePath = `/images/${imageBaseName}.png`;
+
           const card = document.createElement('div');
           card.className = 'card';
           card.innerHTML = `
-            <img src="${item.file_image_path}" alt="${item.file_name}" />
-            <div class="row">
-              <div>${item.file_type}</div>
-              <div>${item.file_name}</div>
+            <img src="${item.file_image_path}" alt="${item.file_name}" class="card-image" />
+            <div class="card-info">
+              <div class="row">
+                <div class="label">${item.file_name}</div>
+                <div class="value">${item.file_type}</div>
+              </div>
+              <div class="row">
+                <div class="label">${item.id}</div>
+                <div class="value">${(item.volume / (1024 ** 3)).toFixed(2)} GB</div>
+              </div>
+              <div class="desc">${item.descr}</div>
             </div>
-            <div class="row">
-              <div>${(item.volume / (1024 ** 3)).toFixed(2)} GB</div>
-            </div>
-            <div class="desc">${item.descr}</div>
             <a class="download" href="${item.file_path}" download>Download</a>
           `;
           container.appendChild(card);
         });
       })
       .catch(err => console.error('데이터 로드 실패:', err));
+
+    // 탭3
+    const input = document.getElementById('imageInput');
+    const preview = document.getElementById('preview');
+    const uploadButton = document.getElementById('uploadButton');
+    const safetensorIdInput = document.getElementById('safetensorId');
+    const statusText = document.getElementById('uploadStatus');
+
+    input.addEventListener('change', () => {
+      const file = input.files[0];
+      if (!file || file.type !== 'image/png') {
+        alert('PNG 파일을 선택하세요.');
+        return;
+      }
+
+      selectedImage = file;
+      selectedFileName = file.name.replace(/\.png$/, '');
+
+      const reader = new FileReader();
+      reader.onload = e => {
+        console.log('파일 읽기 완료:', e.target.result);
+        preview.innerHTML = `<p>미리보기:</p><img src="${e.target.result}" width="200">`;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    uploadButton.addEventListener('click', () => {
+      if (!selectedImage) {
+        alert('PNG 파일을 먼저 선택하세요.');
+        return;
+      }
+
+      const safetensorId = safetensorIdInput.value.trim();
+      if (!safetensorId) {
+        alert('Safetensors ID를 입력하세요.');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('image', selectedImage);
+      formData.append('filename', selectedFileName);
+      formData.append('safetensor_id', safetensorId);
+
+      fetch('/upload_image', {
+        method: 'POST',
+        body: formData
+      })
+        .then(res => res.json())
+        .then(result => {
+          statusText.textContent = result.message;
+          preview.innerHTML = '';
+          input.value = '';
+          selectedImage = null;
+          selectedFileName = null;
+          safetensorIdInput.value = '';
+        })
+        .catch(err => {
+          console.error('업로드 실패:', err);
+          statusText.textContent = '업로드 실패';
+        });
+    });
+  });
   </script>
+
 </body>
 </html>

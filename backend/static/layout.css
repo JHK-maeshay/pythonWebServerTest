@@ -1,3 +1,36 @@
+.tabs {
+      display: flex;
+      margin-bottom: 1em;
+      border-bottom: 2px solid #ccc;
+    }
+    .tab {
+      padding: 10px 20px;
+      border: 1px solid #ccc;
+      border-bottom: none;
+      background-color: #f1f1f1;
+      margin-right: 4px;
+      cursor: pointer;
+    }
+    .tab.active {
+      background-color: #fff;
+      font-weight: bold;
+      border-bottom: 1px solid #fff;
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+
+
+
+
+
+
+
+
+
 body {
   font-family: Arial, sans-serif;
   background: #f8f9fa;
