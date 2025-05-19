@@ -1,6 +1,7 @@
-from flask import Flask, send_from_directory
+from flask import Flask, render_template, send_from_directory, jsonify
 from db import get_db, close_db
 from routes import bp
+import json
 
 app = Flask(__name__)
 app.config.from_object('config.Config')
@@ -13,7 +14,7 @@ def teardown_db(exception):
 
 @app.route('/')
 def index():
-    return send_from_directory('static', 'index.html')
+    return render_template('index.html')
 
 if __name__ == '__main__':
     app.run(port=5001, debug=True)

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>Checkpoint Cards</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='layout.css') }}">
+</head>
+<body>
+  <h1>Checkpoint 카드 목록</h1>
+  <div class="container" id="card-container"></div>
+
+  <script>
+    fetch('/data_get')
+      .then(response => response.json())
+      .then(data => {
+        const container = document.getElementById('card-container');
+        data.forEach(item => {
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `
+            <img src="${item.file_image_path}" alt="${item.file_name}" />
+            <div class="row">
+              <div>${item.file_type}</div>
+              <div>${item.file_name}</div>
+            </div>
+            <div class="row">
+              <div>${(item.volume / (1024 ** 3)).toFixed(2)} GB</div>
+            </div>
+            <div class="desc">${item.descr}</div>
+            <a class="download" href="${item.file_path}" download>Download</a>
+          `;
+          container.appendChild(card);
+        });
+      })
+      .catch(err => console.error('데이터 로드 실패:', err));
+  </script>
+</body>
+</html>

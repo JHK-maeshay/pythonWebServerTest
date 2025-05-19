@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, render_template
 from db import get_db, set_config, get_connection
 
 # API 그룹을 정의 (이름: api)
@@ -30,7 +30,7 @@ def update_db_config():
     except Exception as e:
         return jsonify({"message": f"DB 연결 실패: {str(e)}"}), 500
 
-@bp.route('/data_view', methods=['GET'])
+@bp.route('/data_get', methods=['GET'])
 def get_all_data():
     db = get_db()
     cursor = db.cursor()  # 결과를 dict로 받기 위함
@@ -38,3 +38,7 @@ def get_all_data():
     results = cursor.fetchall()
     cursor.close()
     return jsonify(results)
+
+@bp.route('/data_view')
+def view_page():
+    return render_template('data_view.html')
