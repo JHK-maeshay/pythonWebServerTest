@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, send_from_directory
 from db import get_db, close_db
 from routes import bp
 
@@ -10,6 +10,10 @@ app.register_blueprint(bp)
 @app.teardown_appcontext
 def teardown_db(exception):
     close_db()
+
+@app.route('/')
+def index():
+    return send_from_directory('static', 'index.html')
 
 if __name__ == '__main__':
     app.run(port=5001, debug=True)

@@ -1,51 +1,38 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-  <meta charset="UTF-8" />
-  <title>데이터 표시</title>
-  <style>
-    table { border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid #ddd; padding: 8px; }
-    th { background-color: #f2f2f2; }
-  </style>
-</head>
-<body>
-  <h1>Checkpoint List</h1>
-  <table id="data-table">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>파일명</th>
-        <th>타입</th>
-        <th>용량</th>
-        <th>설명</th>
-        <th>파일 경로</th>
-        <th>이미지 경로</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+<form id="db-config-form">
+  <label>Host: <input type="text" name="host" value="localhost" /></label><br />
+  <label>User: <input type="text" name="user" value="hkit" /></label><br />
+  <label>Password: <input type="password" name="password" value="hkit" /></label><br />
+  <label>DB Name: <input type="text" name="database" value="mydatabase" /></label><br />
+  <label>Port: <input type="number" name="port" value="3306" /></label><br />
+  <button type="submit">Connect</button>
+</form>
 
-  <script>
-    fetch('/data')  // Flask API 엔드포인트 주소 맞게 변경
-      .then(response => response.json())
-      .then(data => {
-        const tbody = document.querySelector('#data-table tbody');
-        data.forEach(item => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${item.id}</td>
-            <td>${item.file_name}</td>
-            <td>${item.file_type}</td>
-            <td>${(item.volume / (1024 ** 3)).toFixed(2)} GB</td>
-            <td>${item.descr}</td>
-            <td>${item.file_path}</td>
-            <td><img src="${item.file_image_path}" alt="${item.file_name}" width="50" /></td>
-          `;
-          tbody.appendChild(tr);
-        });
-      })
-      .catch(err => console.error('데이터 로드 실패:', err));
-  </script>
-</body>
-</html>
+<script>
+  document.getElementById('db-config-form').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const config = Object.fromEntries(formData.entries());
+    try{
+      const response = await fetch('/api/db-config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(config),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {  // 상태 코드가 200번대가 아니면 에러 처리
+          alert(result.message);
+          return; // 여기서 함수 종료 => 페이지 이동 안 함
+        }
+
+        //alert(result.message);  // 성공 시 알림
+        // 성공하면 data_view 페이지로 이동
+        window.location.href = '/data_view';
+
+    } catch (error) {
+      alert('서버와 통신 중 오류가 발생했습니다.');
+      // 필요하면 추가 처리
+    }
+  });
+</script>

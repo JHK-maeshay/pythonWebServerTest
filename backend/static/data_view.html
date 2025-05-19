@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>데이터 표시</title>
+  <style>
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ddd; padding: 8px; }
+    th { background-color: #f2f2f2; }
+  </style>
+</head>
+<body>
+  <h1>Checkpoint List</h1>
+  <table id="data-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>파일명</th>
+        <th>타입</th>
+        <th>용량</th>
+        <th>설명</th>
+        <th>파일 경로</th>
+        <th>이미지 경로</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    
+    fetch('/data_view')  // Flask API 엔드포인트 주소 맞게 변경
+      .then(response => response.json())
+      .then(data => {
+        const tbody = document.querySelector('#data-table tbody');
+        data.forEach(item => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${item.id}</td>
+            <td>${item.file_name}</td>
+            <td>${item.file_type}</td>
+            <td>${(item.volume / (1024 ** 3)).toFixed(2)} GB</td>
+            <td>${item.descr}</td>
+            <td>${item.file_path}</td>
+            <td><img src="${item.file_image_path}" alt="${item.file_name}" width="50" /></td>
+          `;
+          tbody.appendChild(tr);
+        });
+      })
+      .catch(err => console.error('데이터 로드 실패:', err));
+  </script>
+</body>
+</html>
