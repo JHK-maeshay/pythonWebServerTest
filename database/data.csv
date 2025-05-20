@@ -1,3 +1,3 @@
 file_name,file_type,volume,descr,file_path,file_image_path
-dummy_v1.safetensors,checkpoint,7442450944,dummy data,/files/models/dummy_v1.safetensor,/files/images/dummy_v1.png
-dummy_v3.safetensors,checkpoint,6442450944,dummy data,/files/models/dummy_v2.safetensor,/files/images/dummy_v2.png
+dummy4.safetensors,checkpoint,132,descr,/files/safetensors/dummy4.safetensors,/files/images/dummy4.png
+dummy5.safetensors,checkpoint,132,5,/files/safetensors/dummy5.safetensors,/files/images/dummy5.png

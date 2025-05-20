@@ -84,3 +84,24 @@ body {
   border-radius: 6px;
   text-align: center;
 }
+
+
+
+
+
+
+
+
+
+#uploadStatus {
+  margin-top: 1em;
+  font-weight: bold;
+}
+
+#uploadStatus.success {
+  color: green;
+}
+
+#uploadStatus.error {
+  color: red;
+}

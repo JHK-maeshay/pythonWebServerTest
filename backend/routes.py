@@ -2,27 +2,19 @@ import os
 from flask import Blueprint, jsonify, request, render_template, send_from_directory
 from db import get_db, set_config, get_connection
 from db import select_name_from_db_where_id as getid
-from import_func import set_app_img_path as ip
-from import_func import set_app_mod_path as mp
-
-
 
 # API 그룹을 정의 (이름: api)
 bp = Blueprint('api', __name__)
 
-# 이미지 업로드 디렉토리 경로
+# 업로드 디렉토리 설정
 os.makedirs(os.path.join('database', 'files', 'images'), exist_ok=True)
-
-# 모델 파일 업로드 디렉토리 경로
 os.makedirs(os.path.join('database', 'files', 'safetensors'), exist_ok=True)
 
-# 이미지 저장 폴더 경로 설정
+# 이미지 서빙
 @bp.route('/images/<filename>')
 def serve_image(filename):
     image_dir = os.path.join(os.getcwd(), 'database', 'files', 'images')
     return send_from_directory(image_dir, filename)
-
-
 
 @bp.route('/test', methods=['GET'])
 def ping():
@@ -65,6 +57,8 @@ def view_page():
 
 @bp.route('/upload_image', methods=['POST'])
 def upload_image():
+    from import_func import set_app_img_path as ip
+
     image = request.files.get('image')
     filename = request.form.get('filename')
     safetensor_id = request.form.get('safetensor_id')
@@ -85,3 +79,46 @@ def upload_image():
     
     else:
         return jsonify({'message': f'매치되는 파일이 없습니다: {safetensor_id}'}), 500
+    
+@bp.route('/upload_safetensors', methods=['POST'])
+def upload_safetensors():
+    from file_to_csv import file_to_csv
+    from import_csv_r import import_csv_to_db_R
+    from db import get_id_by_filename
+    from import_func import set_app_mod_path as mp
+    from import_func import set_app_root_path as rp
+
+    file = request.files.get('file')
+    filename = request.form.get('filename')
+    filedescr = request.form.get('descr')
+
+    if not file or not filename:
+        return jsonify({'message': '실제 파일이 없습니다.'}), 400
+
+    save_path = mp(f"{filename}.safetensors")
+    try:
+        file.save(save_path)
+
+        # (1) CSV 작성
+        file_info = {
+            'file_name': f"{filename}.safetensors",
+            'file_type': 'checkpoint',
+            'volume': os.path.getsize(save_path),
+            'descr': filedescr,
+            'file_path': f"/files/safetensors/{filename}.safetensors",
+            'file_image_path': f"/files/images/{filename}.png"
+        }
+        file_to_csv(file_info)
+
+        # (2) DB 삽입
+        import_csv_to_db_R(rp('database/data.csv'))
+
+        # (3) 삽입된 ID 조회
+        new_id = get_id_by_filename(file_info['file_name'])
+
+        return jsonify({
+            'message': f'Safetensors 파일이 업로드되고 DB에 등록되었습니다.',
+            'id': new_id
+        }), 200
+    except Exception as e:
+        return jsonify({'message': f'업로드 실패: {str(e)}'}), 500

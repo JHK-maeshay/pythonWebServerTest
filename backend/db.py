@@ -57,3 +57,11 @@ def select_name_from_db_where_id(safetensor_id):
     finally:
         cursor.close()
         conn.close()
+
+def get_id_by_filename(filename):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT id FROM safetensors WHERE file_name = %s ORDER BY id DESC LIMIT 1", (filename,))
+    row = cur.fetchone()
+    conn.close()
+    return row[0] if row else None
