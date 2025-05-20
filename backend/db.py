@@ -58,10 +58,32 @@ def select_name_from_db_where_id(safetensor_id):
         cursor.close()
         conn.close()
 
-def get_id_by_filename(filename):
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT id FROM safetensors WHERE file_name = %s ORDER BY id DESC LIMIT 1", (filename,))
-    row = cur.fetchone()
-    conn.close()
-    return row[0] if row else None
+def get_id_by_filename(filename): #튜플이 아니라 딕셔너리 사용
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT id FROM safetensors WHERE file_name = %s ORDER BY id DESC LIMIT 1", (filename,))
+        row = cur.fetchone()
+        conn.close()
+
+        #print(f"쿼리 결과 row = {row}")  # 예: {'id': 12}
+
+        return row['id'] if row else None
+    except Exception as e:
+        import traceback
+        print("get_id_by_filename error:")
+        traceback.print_exc()
+        return None
+    
+def clear_safetensors_table():
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute("DELETE FROM safetensors")
+        conn.commit()
+        conn.close()
+        print("safetensors 테이블이 초기화되었습니다.")
+    except Exception as e:
+        import traceback
+        print("clear_safetensors_table error:")
+        traceback.print_exc()
