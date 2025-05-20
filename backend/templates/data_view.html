@@ -2,16 +2,16 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <title>Checkpoint Cards</title>
+  <title>Checkpoint Storage</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='layout.css') }}">
 </head>
 <body>
-  <h1>테스트</h1>
+  <h2>Checkpoint Storage</h2>
 
   <div class="tabs" id="tabs">
-    <div class="tab active" data-tab="tab1">탭1</div>
-    <div class="tab" data-tab="tab2">탭2</div>
-    <div class="tab" data-tab="tab3">탭3</div>
+    <div class="tab active" data-tab="tab1">list</div>
+    <div class="tab" data-tab="tab2">search</div>
+    <div class="tab" data-tab="tab3">upload</div>
   </div>
 
   <div id="tab1" class="tab-content active">
@@ -19,7 +19,12 @@
   </div>
 
   <div id="tab2" class="tab-content">
-    <p>탭2 - 개발중</p>
+    <div class="search-bar">
+      <input type="text" id="search-input" placeholder="검색어를 입력하세요" />
+      <button id="search-button">검색</button>
+    </div>
+
+    <div id="search-result-container" class="card-container"></div>
   </div>
 
   <div id="tab3" class="tab-content">
@@ -94,6 +99,42 @@
         });
       })
       .catch(err => console.error('데이터 로드 실패:', err));
+
+    // 탭2
+    document.getElementById('search-button').addEventListener('click', () => {
+    const keyword = document.getElementById('search-input').value.trim();
+
+    fetch(`/search?query=${encodeURIComponent(keyword)}`)
+      .then(response => response.json())
+      .then(data => {
+        const container = document.getElementById('search-result-container');
+        container.innerHTML = ''; // 이전 검색 결과 비우기
+
+        data.forEach(item => {
+          const imageBaseName = item.file_name.replace(/\.safetensors$/, '');
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `
+            <img src="${item.file_image_path}" alt="${item.file_name}" class="card-image" />
+            <div class="card-info">
+              <div class="row">
+                <div class="label">${item.file_name}</div>
+                <div class="value">${item.file_type}</div>
+              </div>
+              <div class="row">
+                <div class="label">${item.id}</div>
+                <div class="value">${(item.volume / (1024 ** 3)).toFixed(2)} GB</div>
+              </div>
+              <div class="desc">${item.descr}</div>
+            </div>
+            <a class="download" href="${item.file_path}" download>Download</a>
+          `;
+          container.appendChild(card);
+        });
+      })
+      .catch(err => console.error('검색 실패:', err));
+  });
+    
 
     // 탭3
     const input = document.getElementById('imageInput');

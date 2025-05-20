@@ -124,3 +124,28 @@ def upload_safetensors():
         }), 200
     except Exception as e:
         return jsonify({'message': f'업로드 실패: {str(e)}'}), 500
+    
+@bp.route('/search')
+def search_files():
+    query = request.args.get('query', '').strip()
+
+    if not query:
+        return jsonify([])  # 빈 검색어이면 빈 리스트 반환
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # 예: file_name 또는 descr 컬럼에서 검색어 포함 여부 확인
+    sql = """
+        SELECT id, file_name, file_type, volume, descr, file_path, file_image_path
+        FROM safetensors
+        WHERE file_name LIKE %s OR descr LIKE %s
+    """
+    like_query = f'%{query}%'
+    cursor.execute(sql, (like_query, like_query))
+    results = cursor.fetchall()
+
+    cursor.close()
+
+    print("검색 결과:", results)
+    return jsonify(results)
