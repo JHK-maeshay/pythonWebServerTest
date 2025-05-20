@@ -71,7 +71,7 @@
         const container = document.getElementById('card-container');
         data.forEach(item => {
           const imageBaseName = item.file_name.replace(/\.safetensors$/, '');//file_name의 확장자 제거
-          const imagePath = `/images/${imageBaseName}.png`;
+          const imagePath = `/files/images/${imageBaseName}.png`;
 
           const card = document.createElement('div');
           card.className = 'card';

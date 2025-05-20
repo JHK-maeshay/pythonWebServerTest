@@ -1,3 +1,2 @@
 file_name,file_type,volume,descr,file_path,file_image_path
-dummy4.safetensors,checkpoint,132,descr,/files/safetensors/dummy4.safetensors,/files/images/dummy4.pngdummy_v1.safetensors,checkpoint,132,descr,/files/safetensors/dummy_v1.safetensors,/files/images/dummy_v1.png
 dummy_v1.safetensors,checkpoint,132,dis,/files/safetensors/dummy_v1.safetensors,/files/images/dummy_v1.png

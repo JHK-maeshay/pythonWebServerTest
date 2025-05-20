@@ -11,9 +11,11 @@ os.makedirs(os.path.join('database', 'files', 'images'), exist_ok=True)
 os.makedirs(os.path.join('database', 'files', 'safetensors'), exist_ok=True)
 
 # 이미지 서빙
-@bp.route('/images/<filename>')
+@bp.route('/files/images/<filename>')
 def serve_image(filename):
-    image_dir = os.path.join(os.getcwd(), 'database', 'files', 'images')
+    # 현재 파일(예: routes.py) 기준으로 이미지 디렉토리 계산
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))  # project-root
+    image_dir = os.path.join(base_dir, 'database', 'files', 'images')           # 절대경로 생성
     return send_from_directory(image_dir, filename)
 
 @bp.route('/test', methods=['GET'])
